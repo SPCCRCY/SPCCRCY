@@ -1,157 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Attendance Form</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Form</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <h1>Attendance Form</h1>
-  <form id="attendance-form">
-    <label>Full Name
-      <input type="text" name="fullName" required />
-    </label>
+    <div class="container">
+        <h2>Attendance Form</h2>
+        <form id="attendanceForm">
+            <label for="fullName">Full Name:</label>
+            <input type="text" id="fullName" name="fullName" required><br>
 
-    <label>Email Address
-      <input type="email" name="email" required />
-    </label>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
 
-    <label>Department
-      <select name="department" id="department" required>
-        <option value="">-- Select Department --</option>
-        <option value="College">College</option>
-        <option value="SHS">SHS</option>
-      </select>
-    </label>
+            <label for="department">Department:</label>
+            <select id="department" name="department" required>
+                <option value="" disabled selected>Select Department</option>
+                <option value="college">College</option>
+                <option value="shs">Senior High School (SHS)</option>
+            </select><br>
 
-    <label>Program
-      <select id="program" name="program" required>
-        <option value="">-- Select Program --</option>
-      </select>
-    </label>
+            <label for="program">Program:</label>
+            <select id="program" name="program" required>
+                <option value="" disabled selected>Select Program</option>
+            </select><br>
 
-    <label>Year Level
-      <select name="yearLevel" id="yearLevel" required>
-        <option value="">-- Select Year Level --</option>
-        <option value="11" class="shs">11</option>
-        <option value="12" class="shs">12</option>
-        <option value="1st Year" class="college">1st Year</option>
-        <option value="2nd Year" class="college">2nd Year</option>
-        <option value="3rd Year" class="college">3rd Year</option>
-        <option value="4th Year" class="college">4th Year</option>
-      </select>
-    </label>
+            <label for="yearLevel">Year Level:</label>
+            <select id="yearLevel" name="yearLevel" required>
+                <option value="" disabled selected>Select Year Level</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+            </select><br>
 
-    <label>Section
-      <select name="section" id="section" required>
-        <option value="">-- Select Section --</option>
-      </select>
-    </label>
+            <label for="section">Section:</label>
+            <select id="section" name="section" required>
+                <option value="" disabled selected>Select Section</option>
+                <!-- Options will be added dynamically -->
+            </select><br>
 
-    <label>Attendance Proof (Screenshot/Image/PDF)
-      <input type="file" name="proof" accept=".png, .jpg, .jpeg, .pdf" required />
-    </label>
+            <label for="proof">Proof of Attendance:</label>
+            <input type="file" id="proof" name="proof" required><br>
 
-    <button type="submit">Submit Attendance</button>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
 
-    <div class="success" id="success-msg" style="display:none;">Attendance submitted successfully!</div>
-    <div class="error" id="error-msg" style="display:none;">Submission failed. Please try again.</div>
-  </form>
+    <script>
+        // Set up department selection event
+        document.getElementById("department").addEventListener("change", function () {
+            const department = this.value;
+            const programSelect = document.getElementById("program");
+            const sectionSelect = document.getElementById("section");
 
-  <script>
-    const departmentSelect = document.getElementById('department');
-    const programSelect = document.getElementById('program');
-    const yearLevelSelect = document.getElementById('yearLevel');
-    const sectionSelect = document.getElementById('section');
+            // Clear previous options
+            programSelect.innerHTML = '<option value="" disabled selected>Select Program</option>';
+            sectionSelect.innerHTML = '<option value="" disabled selected>Select Section</option>';
 
-    const collegePrograms = [
-      "Bachelor of Arts in English Language",
-      "Bachelor of Science in Accounting Information System",
-      "Bachelor of Science in Business Administration major in Financial Management",
-      "Bachelor of Science in Business Administration major in Human Resource Management",
-      "Bachelor of Science in Business Administration major in Marketing Management",
-      "Bachelor of Secondary Education major in Science",
-      "Bachelor of Secondary Education major in Filipino",
-      "Bachelor of Science in Biology",
-      "Bachelor in Human Services",
-      "Bachelor of Science in Medical Laboratory Science",
-      "Bachelor of Science in Nursing",
-      "Bachelor of Science in Pharmacy",
-      "Bachelor of Science in Physical Therapy",
-      "Bachelor of Science in Psychology",
-      "Bachelor of Science in Respiratory Therapy",
-      "Bachelor of Secondary Education major in English",
-      "Bachelor of Science in Radiologic Technology",
-      "Bachelor of Science in Biology major in Medical Biology"
-    ];
+            if (department === "college") {
+                const programs = [
+                    "Bachelor of Arts in English Language",
+                    "Bachelor of Science in Accounting Information System",
+                    "Bachelor of Science in Business Administration major in Financial Management",
+                    "Bachelor of Science in Business Administration major in Human Resource Management",
+                    "Bachelor of Science in Business Administration major in Marketing Management",
+                    "Bachelor of Secondary Education major in Science",
+                    "Bachelor of Secondary Education major in Filipino",
+                    "Bachelor of Science in Biology",
+                    "Bachelor in Human Services",
+                    "Bachelor of Science in Medical Laboratory Science",
+                    "Bachelor of Science in Nursing",
+                    "Bachelor of Science in Pharmacy",
+                    "Bachelor of Science in Physical Therapy",
+                    "Bachelor of Science in Psychology",
+                    "Bachelor of Science in Respiratory Therapy",
+                    "Bachelor of Secondary Education major in English",
+                    "Bachelor of Science in Radiologic Technology",
+                    "Bachelor of Science in Biology major in Medical Biology"
+                ];
 
-    const shsStrands = ["ABM", "STEM", "GAS", "HUMSS", "TVL"];
+                programs.forEach(program => {
+                    const option = document.createElement("option");
+                    option.value = program;
+                    option.textContent = program;
+                    programSelect.appendChild(option);
+                });
 
-    departmentSelect.addEventListener("change", () => {
-      const selected = departmentSelect.value;
+                // Dynamically populate sections A to Z
+                for (let i = 65; i < 91; i++) {
+                    const sectionOption = document.createElement("option");
+                    sectionOption.value = String.fromCharCode(i);
+                    sectionOption.textContent = String.fromCharCode(i);
+                    sectionSelect.appendChild(sectionOption);
+                }
+            } else if (department === "shs") {
+                const programs = ["ABM", "STEM", "GAS", "HUMSS", "TVL"];
+                programs.forEach(program => {
+                    const option = document.createElement("option");
+                    option.value = program;
+                    option.textContent = program;
+                    programSelect.appendChild(option);
+                });
 
-      // Populate programs
-      programSelect.innerHTML = '<option value="">-- Select Program --</option>';
-      const programs = selected === "College" ? collegePrograms :
-                       selected === "SHS" ? shsStrands : [];
-
-      programs.forEach(prog => {
-        const opt = document.createElement("option");
-        opt.value = prog;
-        opt.textContent = prog;
-        programSelect.appendChild(opt);
-      });
-
-      // Show/hide year levels
-      Array.from(yearLevelSelect.options).forEach(option => {
-        if (selected === "College") {
-          option.style.display = option.classList.contains("college") || option.value === "" ? "block" : "none";
-        } else if (selected === "SHS") {
-          option.style.display = option.classList.contains("shs") || option.value === "" ? "block" : "none";
-        } else {
-          option.style.display = "none";
-        }
-      });
-
-      // Reset year level selection
-      yearLevelSelect.value = "";
-    });
-
-    // Populate sections A-Z
-    const sectionOptions = '<option value="">-- Select Section --</option>' + 
-      Array.from({length: 26}, (_, i) => {
-        const letter = String.fromCharCode(65 + i); // A to Z
-        return `<option value="${letter}">${letter}</option>`;
-      }).join('');
-    sectionSelect.innerHTML = sectionOptions;
-
-    // Submit handler
-    const form = document.getElementById("attendance-form");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-
-      try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbyidFVzo-lOYYZ1lB9ZkapHONG6HzqvfQj2aym2Fs3WRcn_63sk9hoRm3U5Vlht-NvIBw/exec", {
-          method: "POST",
-          body: formData,
+                // Dynamically populate sections A to Z
+                for (let i = 65; i < 91; i++) {
+                    const sectionOption = document.createElement("option");
+                    sectionOption.value = String.fromCharCode(i);
+                    sectionOption.textContent = String.fromCharCode(i);
+                    sectionSelect.appendChild(sectionOption);
+                }
+            }
         });
 
-        if (response.ok) {
-          document.getElementById("success-msg").style.display = "block";
-          document.getElementById("error-msg").style.display = "none";
-          form.reset();
-        } else {
-          throw new Error("Submission failed");
-        }
-      } catch (error) {
-        document.getElementById("success-msg").style.display = "none";
-        document.getElementById("error-msg").style.display = "block";
-        console.error(error);
-      }
-    });
-  </script>
+        document.getElementById("attendanceForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById("proof");
+            const file = fileInput.files[0];
+
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const base64 = reader.result.split(",")[1];
+
+                const formData = {
+                    fullName: document.getElementById("fullName").value,
+                    email: document.getElementById("email").value,
+                    department: document.getElementById("department").value,
+                    program: document.getElementById("program").value,
+                    yearLevel: document.getElementById("yearLevel").value,
+                    section: document.getElementById("section").value,
+                    fileBase64: base64,
+                    fileName: file.name,
+                    fileType: file.type
+                };
+
+                const response = await fetch("https://script.google.com/macros/s/AKfycbyidFVzo-lOYYZ1lB9ZkapHONG6HzqvfQj2aym2Fs3WRcn_63sk9hoRm3U5Vlht-NvIBw/exec", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams(formData),
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert("Attendance submitted!");
+                } else {
+                    alert("Error: " + result.error);
+                }
+            };
+
+            reader.readAsDataURL(file);
+        });
+    </script>
 </body>
+
 </html>
