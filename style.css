@@ -7,9 +7,15 @@ body {
   background-color: #f9f9f9;
 }
 
-h1 {
+h2 {
   text-align: center;
   color: #333;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 form {
@@ -17,20 +23,29 @@ form {
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 label {
   display: block;
   margin-top: 1rem;
   font-weight: bold;
+  font-size: 1rem;
 }
 
 input, select {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.75rem;
   margin-top: 0.25rem;
   border-radius: 5px;
   border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 button {
@@ -39,7 +54,7 @@ button {
   width: 100%;
   background-color: #4CAF50;
   color: white;
-  font-size: 1rem;
+  font-size: 1.1rem;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -49,14 +64,42 @@ button:hover {
   background-color: #45a049;
 }
 
+button:disabled {
+  background-color: #b5d1b5;
+  cursor: not-allowed;
+}
+
+input[type="file"] {
+  margin-top: 1rem;
+}
+
+select, input {
+  font-size: 1rem;
+}
+
+/* Success and Error Messages */
 .success {
   color: green;
   margin-top: 1rem;
   text-align: center;
+  font-weight: bold;
 }
 
 .error {
   color: red;
   margin-top: 1rem;
   text-align: center;
+  font-weight: bold;
+}
+
+.loading {
+  display: none;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.loading.active {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
