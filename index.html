@@ -14,7 +14,7 @@
     </label>
 
     <label>Department
-      <select name="department" required>
+      <select name="department" id="department" required>
         <option value="">-- Select Department --</option>
         <option value="College">College</option>
         <option value="SHS">SHS</option>
@@ -28,14 +28,14 @@
     </label>
 
     <label>Year Level
-      <select name="yearLevel" required>
+      <select name="yearLevel" id="yearLevel" required>
         <option value="">-- Select Year Level --</option>
-        <option value="11">11</option>
-        <option value="12">12</option>
-        <option value="1st Year">1st Year</option>
-        <option value="2nd Year">2nd Year</option>
-        <option value="3rd Year">3rd Year</option>
-        <option value="4th Year">4th Year</option>
+        <option value="11" class="shs">11</option>
+        <option value="12" class="shs">12</option>
+        <option value="1st Year" class="college">1st Year</option>
+        <option value="2nd Year" class="college">2nd Year</option>
+        <option value="3rd Year" class="college">3rd Year</option>
+        <option value="4th Year" class="college">4th Year</option>
       </select>
     </label>
 
@@ -56,8 +56,9 @@
   </form>
 
   <script>
-    const departmentSelect = document.querySelector('select[name="department"]');
+    const departmentSelect = document.getElementById('department');
     const programSelect = document.getElementById('program');
+    const yearLevelSelect = document.getElementById('yearLevel');
     const sectionSelect = document.getElementById('section');
 
     const collegePrograms = [
@@ -83,19 +84,34 @@
 
     const shsStrands = ["ABM", "STEM", "GAS", "HUMSS", "TVL"];
 
-    departmentSelect.addEventListener('change', () => {
+    departmentSelect.addEventListener("change", () => {
       const selected = departmentSelect.value;
+
+      // Populate programs
       programSelect.innerHTML = '<option value="">-- Select Program --</option>';
+      const programs = selected === "College" ? collegePrograms :
+                       selected === "SHS" ? shsStrands : [];
 
-      const options = selected === 'College' ? collegePrograms :
-                      selected === 'SHS' ? shsStrands : [];
-
-      options.forEach(prog => {
-        const opt = document.createElement('option');
+      programs.forEach(prog => {
+        const opt = document.createElement("option");
         opt.value = prog;
         opt.textContent = prog;
         programSelect.appendChild(opt);
       });
+
+      // Show/hide year levels
+      Array.from(yearLevelSelect.options).forEach(option => {
+        if (selected === "College") {
+          option.style.display = option.classList.contains("college") || option.value === "" ? "block" : "none";
+        } else if (selected === "SHS") {
+          option.style.display = option.classList.contains("shs") || option.value === "" ? "block" : "none";
+        } else {
+          option.style.display = "none";
+        }
+      });
+
+      // Reset year level selection
+      yearLevelSelect.value = "";
     });
 
     // Populate sections A-Z
