@@ -1,184 +1,161 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Attendance Form</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 2rem; }
-    label { display: block; margin-top: 1rem; }
-    input, select { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
-    button { margin-top: 1rem; padding: 0.75rem; width: 100%; }
-    .success { color: green; margin-top: 1rem; }
-    .error { color: red; margin-top: 1rem; }
-  </style>
-</head>
-<body>
+---
+layout: default
+title: Attendance
+---
 
-  <h1>Attendance Submission</h1>
-  <form id="attendanceForm">
-    <label>Full Name
-      <input type="text" name="name" required />
-    </label>
+<h1>Attendance Form</h1>
 
-    <label>Department
-      <select name="department" required>
-        <option value="">Select</option>
-        <option value="College">College</option>
-        <option value="SHS">SHS</option>
-      </select>
-    </label>
+<form id="attendanceForm">
+  <label>Full Name
+    <input type="text" name="name" required />
+  </label>
 
-    <label>Year Level
-      <select name="year" required>
-        <option value="">Select</option>
-        <option>1st Year</option>
-        <option>2nd Year</option>
-        <option>3rd Year</option>
-        <option>4th Year</option>
-        <option>Grade 11</option>
-        <option>Grade 12</option>
-      </select>
-    </label>
+  <label>Department
+    <select name="department" required>
+      <option value="">Select</option>
+      <option value="College">College</option>
+      <option value="SHS">SHS</option>
+    </select>
+  </label>
 
-    <label>Section
-      <input type="text" name="section" required />
-    </label>
+  <label>Year Level
+    <select name="year" required>
+      <option value="">Select</option>
+      <option>1st Year</option>
+      <option>2nd Year</option>
+      <option>3rd Year</option>
+      <option>4th Year</option>
+      <option>Grade 11</option>
+      <option>Grade 12</option>
+    </select>
+  </label>
 
-    <label>Attendance Proof (Image or PDF)
-      <input type="file" name="file" accept="image/*,.pdf" required />
-    </label>
+  <label>Section
+    <input type="text" name="section" required />
+  </label>
 
-    <button type="submit">Submit Attendance</button>
-  </form>
+  <label>Attendance File Proof (PDF/IMG)
+    <input type="file" name="file" accept=".pdf,image/*" required />
+  </label>
 
-  <div id="status"></div>
+  <button type="submit">Submit Attendance</button>
+</form>
 
-  <script>
-    const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
-    const API_KEY = 'YOUR_API_KEY';
-    const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
-    const DISCOVERY_DOCS = [
-      "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
-      "https://sheets.googleapis.com/$discovery/rest?version=v4"
-    ];
+<div id="status"></div>
 
-    const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
-    const SHEET_NAME = 'Sheet1';
-    const DRIVE_FOLDER_ID = 'YOUR_DRIVE_FOLDER_ID';
+<script>
+  const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+  const API_KEY = 'YOUR_API_KEY';
+  const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+  const SHEET_NAME = 'Sheet1';
+  const DRIVE_FOLDER_ID = 'YOUR_DRIVE_FOLDER_ID';
+  const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
 
-    let tokenClient;
-    let gapiInited = false;
-    let gisInited = false;
+  let tokenClient;
 
-    const statusDiv = document.getElementById("status");
+  function showStatus(msg, isError = false) {
+    const div = document.getElementById("status");
+    div.textContent = msg;
+    div.className = isError ? "error" : "success";
+  }
 
-    function updateStatus(msg, isError = false) {
-      statusDiv.textContent = msg;
-      statusDiv.className = isError ? 'error' : 'success';
-    }
-
-    function gapiLoaded() {
-      gapi.load('client', initializeGapiClient);
-    }
-
-    async function initializeGapiClient() {
-      await gapi.client.init({
-        apiKey: API_KEY,
-        discoveryDocs: DISCOVERY_DOCS,
-      });
-      gapiInited = true;
-    }
-
-    function gisLoaded() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: '', // set later
-      });
-      gisInited = true;
-    }
-
-    function ensureAuthorized(callback) {
-      tokenClient.callback = async (resp) => {
-        if (resp.error) throw resp;
-        callback();
-      };
-
-      if (!gapi.client.getToken()) {
-        tokenClient.requestAccessToken({ prompt: 'consent' });
-      } else {
-        callback();
-      }
-    }
-
-    async function uploadToDrive(file) {
-      const metadata = {
-        name: file.name,
-        parents: [DRIVE_FOLDER_ID]
-      };
-
-      const form = new FormData();
-      form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
-      form.append("file", file);
-
-      const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
-        method: "POST",
-        headers: new Headers({ "Authorization": "Bearer " + gapi.client.getToken().access_token }),
-        body: form
-      });
-
-      const data = await res.json();
-      return `https://drive.google.com/file/d/${data.id}/view`;
-    }
-
-    async function appendToSheet(values) {
-      await gapi.client.sheets.spreadsheets.values.append({
-        spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A:E`,
-        valueInputOption: 'RAW',
-        insertDataOption: 'INSERT_ROWS',
-        resource: {
-          values: [values]
-        }
-      });
-    }
-
-    document.getElementById("attendanceForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      updateStatus("Submitting...", false);
-
-      ensureAuthorized(async () => {
-        const form = e.target;
-        const name = form.name.value.trim();
-        const dept = form.department.value;
-        const year = form.year.value;
-        const section = form.section.value;
-        const file = form.file.files[0];
-
-        try {
-          const fileUrl = await uploadToDrive(file);
-          await appendToSheet([name, dept, year, section, fileUrl]);
-          updateStatus("Attendance submitted successfully!");
-          form.reset();
-        } catch (err) {
-          console.error(err);
-          updateStatus("Submission failed. Check console for details.", true);
-        }
-      });
+  async function initClient() {
+    await gapi.client.init({
+      apiKey: API_KEY,
+      discoveryDocs: [
+        "https://sheets.googleapis.com/$discovery/rest?version=v4",
+        "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"
+      ],
     });
 
-    window.onload = () => {
-      const script1 = document.createElement('script');
-      script1.src = "https://apis.google.com/js/api.js";
-      script1.onload = gapiLoaded;
-      document.body.appendChild(script1);
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: () => {}
+    });
+  }
 
-      const script2 = document.createElement('script');
-      script2.src = "https://accounts.google.com/gsi/client";
-      script2.onload = gisLoaded;
-      document.body.appendChild(script2);
+  function ensureAuth(callback) {
+    tokenClient.callback = async (resp) => {
+      if (resp.error) {
+        showStatus("Authorization failed.", true);
+        return;
+      }
+      callback();
     };
-  </script>
-</body>
-</html>
+    if (!gapi.client.getToken()) {
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    } else {
+      callback();
+    }
+  }
+
+  async function uploadFile(file) {
+    const metadata = {
+      name: file.name,
+      parents: [DRIVE_FOLDER_ID]
+    };
+
+    const formData = new FormData();
+    formData.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+    formData.append("file", file);
+
+    const res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
+      method: "POST",
+      headers: new Headers({
+        Authorization: "Bearer " + gapi.client.getToken().access_token
+      }),
+      body: formData
+    });
+
+    const data = await res.json();
+    return `https://drive.google.com/file/d/${data.id}/view`;
+  }
+
+  async function addToSheet(values) {
+    await gapi.client.sheets.spreadsheets.values.append({
+      spreadsheetId: SPREADSHEET_ID,
+      range: SHEET_NAME + "!A:E",
+      valueInputOption: "USER_ENTERED",
+      insertDataOption: "INSERT_ROWS",
+      resource: {
+        values: [values]
+      }
+    });
+  }
+
+  document.getElementById("attendanceForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    showStatus("Submitting...");
+
+    ensureAuth(async () => {
+      const form = e.target;
+      const name = form.name.value;
+      const department = form.department.value;
+      const year = form.year.value;
+      const section = form.section.value;
+      const file = form.file.files[0];
+
+      try {
+        const fileUrl = await uploadFile(file);
+        await addToSheet([name, department, year, section, fileUrl]);
+        showStatus("Attendance submitted successfully!");
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        showStatus("Submission failed. Check console.", true);
+      }
+    });
+  });
+
+  window.onload = () => {
+    const script1 = document.createElement("script");
+    script1.src = "https://apis.google.com/js/api.js";
+    script1.onload = () => gapi.load("client", initClient);
+    document.body.appendChild(script1);
+
+    const script2 = document.createElement("script");
+    script2.src = "https://accounts.google.com/gsi/client";
+    document.body.appendChild(script2);
+  };
+</script>
